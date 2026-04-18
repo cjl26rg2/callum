@@ -86,16 +86,63 @@ function navigateActivity(dir) {
   if (next >= 0 && next < allActivities.length) displayActivity(next);
 }
 
+function applyDominantColorFromAvatar(imgSrc) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const size = 64;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, size, size);
+    const data = ctx.getImageData(0, 0, size, size).data;
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const alpha = data[i + 3];
+      if (alpha < 128) continue; 
+      r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+    }
+    if (!count) return;
+    r = Math.round(r / count);
+    g = Math.round(g / count);
+    b = Math.round(b / count);
+    const darken = (v, f) => Math.max(0, Math.min(255, Math.round(v * f)));
+    const bgR = darken(r, 0.15), bgG = darken(g, 0.15), bgB = darken(b, 0.15);
+    const bg2R = darken(r, 0.22), bg2G = darken(g, 0.22), bg2B = darken(b, 0.22);
+    const cardR = darken(r, 0.28), cardG = darken(g, 0.28), cardB = darken(b, 0.28);
+    const amberR = Math.min(255, r + 40), amberG = Math.min(255, g + 40), amberB = Math.min(255, b + 40);
+    const root = document.documentElement;
+    root.style.setProperty("--bg",   `rgb(${bgR},${bgG},${bgB})`);
+    root.style.setProperty("--bg2",  `rgb(${bg2R},${bg2G},${bg2B})`);
+    root.style.setProperty("--card", `rgb(${cardR},${cardG},${cardB})`);
+    root.style.setProperty("--card-hover", `rgb(${darken(r,0.35)},${darken(g,0.35)},${darken(b,0.35)})`);
+    root.style.setProperty("--border",  `rgba(${r},${g},${b},0.15)`);
+    root.style.setProperty("--border2", `rgba(${r},${g},${b},0.28)`);
+    root.style.setProperty("--amber",     `rgb(${amberR},${amberG},${amberB})`);
+    root.style.setProperty("--amber-dim",  `rgba(${r},${g},${b},0.13)`);
+    root.style.setProperty("--amber-dim2", `rgba(${r},${g},${b},0.24)`);
+    root.style.setProperty("--banner-tint", `rgba(${r},${g},${b},0.85)`);
+  };
+  img.src = imgSrc;
+}
+
 function updatePresence(d) {
   const u = d.discord_user;
   const avatarEl = document.getElementById("avatarBig");
   const mobileAvatarEl = document.getElementById("mobileAvatar");
-  const avatarSrc = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128`;
-  if (avatarEl.src !== avatarSrc) avatarEl.src = avatarSrc;
+  const avatarHash = u.avatar;
+  const avatarExt = avatarHash && avatarHash.startsWith("a_") ? "gif" : "png";
+  const avatarSrc = avatarHash
+    ? `https://cdn.discordapp.com/avatars/${u.id}/${avatarHash}.${avatarExt}?size=256`
+    : `https://cdn.discordapp.com/embed/avatars/${(BigInt(u.id) >> 22n) % 6n}.png`;
+  if (avatarEl && avatarEl.src !== avatarSrc) {
+    avatarEl.src = avatarSrc;
+    applyDominantColorFromAvatar(avatarSrc);
+  }
   if (mobileAvatarEl && mobileAvatarEl.src !== avatarSrc) mobileAvatarEl.src = avatarSrc;
   document.getElementById("username").textContent = u.global_name || u.username;
 
-  // Avatar decoration
   const decorEl = document.getElementById("avatarDecoration");
   if (decorEl) {
     const decoData = u.avatar_decoration_data;
@@ -107,7 +154,6 @@ function updatePresence(d) {
     }
   }
 
-  // Primary guild tag + icon (field is primary_guild, not clan)
   const guildTagEl  = document.getElementById("guildTag");
   const guildIconEl = document.getElementById("guildIcon");
   const wrapEl      = document.getElementById("guildTagWrap");
@@ -190,21 +236,16 @@ const projectData = {
       { cat: "GUI",         title: "Upgrade Menu",  desc: "Card-based tower upgrade system.",    items: ["Card-based upgrade UI", "Tier 1–4 management"],                                         status: "wip"  },
     ],
   },
-  "My Arts": {
-    lang: "// design",
-    intro: "My drawings — soon to be added.",
-    description: "Details to be added.",
-    images: [],
-    action: { label: "View Project", href: "#" },
+  "nigbot": {
+    lang: "// python · discord",
+    intro: "A Discord bot that nukes channels on a set schedule.",
+    description: "nigbot is a selfbot/Discord bot that deletes and recreates channels at whatever interval you set. built it for fun, runs off a simple config. does what it says on the tin.",
+    images: [
+      "https://opengraph.githubassets.com/1/aexdm/nigbot",
+    ],
+    action: { label: "View on GitHub", href: "https://github.com/aexdm/nigbot" },
     roadmap: [],
-  },
-  "Kurva": {
-    lang: "// python",
-    intro: "A Python project — more details soon.",
-    description: "Details to be added.",
-    images: [],
-    action: { label: "View Project", href: "#" },
-    roadmap: [],
+    botAvatarId: "1309568330397761596", 
   },
 };
 
@@ -292,7 +333,7 @@ document.querySelectorAll(".project-row, .project-card").forEach(row => {
 const cycleWords = [
   "MY BED I LOVE IT", "money", "roblox", "art", "my friends", "code",
   "my phone", "drawing", "fashion", "chaos", "summer",
-  "Tyler the Creator", "anime", "memes", "food", "sleep",
+  "Tyler The Creator", "anime", "memes", "food", "sleep",
   "cats", "the vibe", "aidenhub.dev",
 ];
 let wordIndex = 0;
