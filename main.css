@@ -279,29 +279,97 @@ body::before {
   overflow: hidden;
 }
 
+/* mp4 video banner */
 .profile-banner-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(0.8) brightness(0.75);
+}
+/* pfp color tint over the video */
+.profile-banner-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--banner-tint, transparent);
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+  transition: background 1s ease;
+}
+/* fade to card at the bottom */
+.profile-banner-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, var(--card) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.profile-banner-static {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,
+    #0a0f1e 0%,
+    #111827 20%,
+    #1a1040 40%,
+    #0d1535 55%,
+    #162040 70%,
+    #0f0a1e 85%,
+    #070a14 100%
+  );
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.4s ease;
+}
+
+.profile-banner-static::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 20% 50%, rgba(99,130,255,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 80% 30%, rgba(160,100,255,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 40% at 60% 80%, rgba(99,130,255,0.08) 0%, transparent 50%);
+  animation: bannerPulse 8s ease-in-out infinite;
+  transition: opacity 0.4s ease;
+}
+
+.profile-banner-static.has-banner::before {
+  background: none;
+  animation: none;
+}
+
+/* fade-to-card at the bottom so avatar blends in */
+.profile-banner-static::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  mix-blend-mode: overlay;
   mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 
-.profile-banner-video-b {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: saturate(0.8) brightness(0.75);
-  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-  opacity: 0;
-  transition: opacity 1.2s ease;
+.profile-banner-static.has-banner::after {
+  background-image: none;
+  background: linear-gradient(to bottom, transparent 55%, var(--card) 100%);
+  opacity: 1;
+  mix-blend-mode: normal;
+  mask-image: none;
+  -webkit-mask-image: none;
 }
+
+@keyframes bannerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+
 
 .star-canvas {
   position: absolute;
@@ -776,6 +844,136 @@ body::before {
   background: rgba(77,216,173,0.1);
   box-shadow: 0 0 12px rgba(77,216,173,0.2);
 }
+
+/* nigbot card preview */
+.project-card-preview--nigbot {
+  background: #0d1120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nigbot-preview-bg {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #070a14 0%, #0d1535 50%, #111827 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.nigbot-preview-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(99,130,255,0.12) 0%, transparent 65%);
+}
+.nigbot-preview-text {
+  font-family: var(--mono);
+  font-size: 15px;
+  color: rgba(99,130,255,0.4);
+  letter-spacing: 0.2em;
+  position: relative;
+  z-index: 1;
+}
+
+/* friends WIP */
+.friends-wip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 60px;
+  gap: 20px;
+}
+
+.friends-wip-terminal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.friends-wip-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.fwip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.fwip-dot--red    { background: #ff5f57; }
+.fwip-dot--yellow { background: #ffbd2e; }
+.fwip-dot--green  { background: #28c840; }
+
+.friends-wip-terminal-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.fwip-terminal-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 8px;
+}
+
+.friends-wip-body {
+  padding: 18px 20px 20px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+.fwip-key    { color: #c792ea; }
+.fwip-fn     { color: #82aaff; }
+.fwip-op     { color: var(--amber); opacity: 0.7; }
+.fwip-bracket{ color: var(--text); opacity: 0.5; }
+.fwip-semi   { color: var(--muted); }
+.fwip-muted  { color: var(--muted); opacity: 0.5; }
+.fwip-comment{ color: var(--muted); opacity: 0.45; font-style: italic; }
+.fwip-indent { padding-left: 20px; }
+
+.fwip-cursor {
+  color: var(--amber);
+  animation: blink 1.1s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.friends-wip-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--amber-dim2);
+  background: var(--amber-dim);
+  padding: 3px 12px;
+  border-radius: 4px;
+}
+
+.friends-wip-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.5;
+}
+
  
 .empty-friends { grid-column: 1 / -1; text-align: center; padding: 60px 0; color: var(--muted); }
 .empty-friends svg { width: 28px; height: 28px; opacity: 0.3; margin-bottom: 12px; }
