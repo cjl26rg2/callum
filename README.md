@@ -6,7 +6,7 @@
 
 # hey, i'm aiden 👋
 
-**developer · i build things, break them, then rebuild them better**
+**developer · i code things**
 
 [![Discord](https://img.shields.io/badge/discord-@aexdm-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.com/users/853310319002517524)
 [![GitHub](https://img.shields.io/badge/github-aexdm-181717?style=flat&logo=github&logoColor=white)](https://github.com/aexdm)
@@ -28,35 +28,9 @@ local aiden = {
 }
 ```
 
-hey, i’m a developer who likes building things from scratch and figuring stuff out as I go.
+hey, i’m a developer who likes coding silly things  and figuring stuff out as I go.
 
 i spend most of my time in **Lua, Python, and web stuff**, but i’m always experimenting and learning new tools.
-
-i care a lot about **clean design, smooth systems, and making things feel good to use**, not just function.
-
----
-
-## // projects
-
-### 🎮 AW : Heart Of The Unreturned `WIP`
-> Roblox parkour project inspired by Abyss World.
-
-- movement systems, bug fixes, gameplay polish
-- checkpoint + momentum-based mechanics
-- contributed to world building & lighting
-- **stack:** `Lua` `Roblox Studio`
-- [▶ play](https://www.roblox.com/games/132429881613824/ABYSS-WORLD-HOTU)
-
----
-
-### 🤖 nigbot
-> Discord automation bot for scheduled channel resets.
-
-- configurable system
-- channel wipe & rebuild automation
-- simple but effective setup
-- **stack:** `Python` `Discord API`
-- [→ github](https://github.com/aexdm/nigbot)
 
 ---
 
