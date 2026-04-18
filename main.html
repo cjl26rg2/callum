@@ -113,11 +113,8 @@
 
         <div class="profile-card">
           <div class="profile-banner-wrap">
-            <video id="bannerA" class="profile-banner-video" autoplay muted playsinline>
-              <source src="video/banner.mp4" type="video/mp4">
-            </video>
-            <video id="bannerB" class="profile-banner-video-b" muted playsinline>
-              <source src="video/banner.mp4" type="video/mp4">
+            <video class="profile-banner-video" autoplay loop muted playsinline>
+              <source src="video/banner.grey.mp4" type="video/mp4">
             </video>
           </div>
           <div class="profile-bottom">
@@ -253,51 +250,29 @@
           </div>
         </div>
 
-        <div class="project-card" data-project="My Arts">
-          <div class="project-card-ext" style="opacity:0.3; pointer-events:none;">
-            <i data-lucide="arrow-up-right"></i>
-          </div>
-          <div class="project-card-preview project-card-preview--icon" style="--icon-color:#5dba7e;">
-            <i data-lucide="palette"></i>
-          </div>
-          <div class="project-card-body">
-            <div class="project-card-header">
-              <div class="project-card-icon project-card-icon--placeholder" style="--icon-color:#5dba7e;">
-                <i data-lucide="palette"></i>
-              </div>
-              <div>
-                <div class="project-card-name">My Arts</div>
-                <div class="project-card-eyebrow">// design · art</div>
-              </div>
-            </div>
-            <div class="project-card-desc">My drawings — soon to be added.</div>
-            <div class="project-card-footer">
-              <span class="wip-badge">WORK IN PROGRESS</span>
-              <span class="lang-tag">Design</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="project-card" data-project="Kurva">
-          <div class="project-card-ext" style="opacity:0.3; pointer-events:none;">
+
+        <div class="project-card" data-project="nigbot">
+          <a href="https://github.com/aexdm/nigbot" class="project-card-ext" target="_blank" onclick="event.stopPropagation()">
             <i data-lucide="arrow-up-right"></i>
-          </div>
-          <div class="project-card-preview project-card-preview--icon" style="--icon-color:#60a5fa;">
-            <i data-lucide="database"></i>
+          </a>
+          <div class="project-card-preview project-card-preview--nigbot">
+            <div class="nigbot-preview-bg">
+              <span class="nigbot-preview-text">[ nigbot ]</span>
+            </div>
           </div>
           <div class="project-card-body">
             <div class="project-card-header">
-              <div class="project-card-icon project-card-icon--placeholder" style="--icon-color:#60a5fa;">
-                <i data-lucide="database"></i>
+              <div class="project-card-icon" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(99,130,255,0.3);overflow:hidden;padding:0;">
+                <img id="nigbotCardIcon" src="https://cdn.discordapp.com/avatars/1449114322214326395/cb3cfb0cadfa6bcf839d4e02eb075838?size=256" alt="nigbot" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerText='🤖';">
               </div>
               <div>
-                <div class="project-card-name">Kurva</div>
-                <div class="project-card-eyebrow">// python</div>
+                <div class="project-card-name">nigbot</div>
+                <div class="project-card-eyebrow">// python · discord</div>
               </div>
             </div>
-            <div class="project-card-desc">A Python project — more details soon.</div>
+            <div class="project-card-desc">A Discord bot that nukes channels on a set schedule. fire and forget.</div>
             <div class="project-card-footer">
-              <span class="wip-badge">WORK IN PROGRESS</span>
               <span class="lang-tag">Python</span>
             </div>
           </div>
@@ -310,7 +285,29 @@
       <div class="section-tag">// friends</div>
       <h2 class="section-title">People I know</h2>
 
-      <div class="friends-grid">
+      <div class="friends-wip">
+        <div class="friends-wip-terminal">
+          <div class="friends-wip-bar">
+            <span class="fwip-dot fwip-dot--red"></span>
+            <span class="fwip-dot fwip-dot--yellow"></span>
+            <span class="fwip-dot fwip-dot--green"></span>
+            <span class="fwip-terminal-title">friends.js</span>
+          </div>
+          <div class="friends-wip-body">
+            <p><span class="fwip-muted">// TODO: add my friends here</span></p>
+            <p><span class="fwip-key">const</span> friends <span class="fwip-op">=</span> <span class="fwip-bracket">[</span></p>
+            <p class="fwip-indent"><span class="fwip-comment">// ...loading</span></p>
+            <p><span class="fwip-bracket">]</span><span class="fwip-semi">;</span></p>
+            <br>
+            <p><span class="fwip-key">export default</span> <span class="fwip-fn">render</span><span class="fwip-bracket">(</span>friends<span class="fwip-bracket">)</span><span class="fwip-semi">;</span></p>
+            <p class="fwip-cursor-line"><span class="fwip-cursor">▋</span></p>
+          </div>
+        </div>
+        <div class="friends-wip-label">work in progress</div>
+        <div class="friends-wip-sub">check back later</div>
+      </div>
+
+      <div class="friends-grid" style="display:none;">
 
         <div class="friend-card">
           <div class="friend-banner">
@@ -412,37 +409,35 @@
   </div>
 </div>
 
-<script src="index.js"></script>
-<script>lucide.createIcons();</script>
+
 <script>
-(function initVideoLoop() {
-  const a = document.getElementById('bannerA');
-  const b = document.getElementById('bannerB');
-  if (!a || !b) return;
-  const FADE_BEFORE = 1.5; 
+(function() {
+  const vid = document.querySelector('.profile-banner-video');
+  if (!vid) return;
+  vid.muted = true;
+  const tryPlay = () => vid.play().catch(() => {});
+  tryPlay();
+  document.addEventListener('click', tryPlay, { once: true });
+  document.addEventListener('touchstart', tryPlay, { once: true });
 
-  function crossfade(from, to) {
-    to.currentTime = 0;
-    to.play();
-    to.style.opacity = 1;
-    to.style.transition = 'opacity 1.2s ease';
-    from.style.transition = 'opacity 1.2s ease';
-    from.style.opacity = 0;
-    setTimeout(() => { from.pause(); from.currentTime = 0; }, 1300);
-  }
-
-  a.addEventListener('timeupdate', () => {
-    if (a.duration && a.currentTime >= a.duration - FADE_BEFORE && parseFloat(b.style.opacity || 0) < 0.5) {
-      crossfade(a, b);
+  vid.style.transition = 'opacity 0.6s ease';
+  vid.addEventListener('timeupdate', () => {
+    const remaining = vid.duration - vid.currentTime;
+    if (remaining < 0.7) {
+      vid.style.opacity = '0';
     }
   });
-  b.addEventListener('timeupdate', () => {
-    if (b.duration && b.currentTime >= b.duration - FADE_BEFORE && parseFloat(a.style.opacity || 1) < 0.5) {
-      a.style.opacity = 0;
-      crossfade(b, a);
+  vid.addEventListener('seeked', () => {
+    if (vid.currentTime < 0.5) {
+      vid.style.opacity = '1';
     }
   });
 })();
+</script>
+<script src="index.js"></script>
+<script>lucide.createIcons();</script>
+
+<script>
 
 (function initStars() {
   const canvas = document.getElementById('starCanvas');
@@ -473,7 +468,6 @@
     ctx.closePath();
     ctx.fillStyle = `rgba(255,245,210,${opacity})`;
     ctx.fill();
-    // soft glow
     ctx.shadowColor = `rgba(255,230,150,${opacity * 0.6})`;
     ctx.shadowBlur = size * 2.5;
     ctx.fill();
