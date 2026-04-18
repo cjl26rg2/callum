@@ -343,7 +343,6 @@ body::before {
   animation: none;
 }
 
-/* fade-to-card at the bottom so avatar blends in */
 .profile-banner-static::after {
   content: '';
   position: absolute;
