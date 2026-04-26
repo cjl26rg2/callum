@@ -137,9 +137,11 @@ function updatePresence(d) {
     ? `https://cdn.discordapp.com/avatars/${u.id}/${avatarHash}.${avatarExt}?size=256`
     : `https://cdn.discordapp.com/embed/avatars/${(BigInt(u.id) >> 22n) % 6n}.png`;
   if (avatarEl && avatarEl.src !== avatarSrc) {
-    avatarEl.src = avatarSrc;
+  avatarEl.src = avatarSrc;
+  if ((localStorage.getItem("theme") || "pfp") === "pfp") {
     applyDominantColorFromAvatar(avatarSrc);
   }
+}
   if (mobileAvatarEl && mobileAvatarEl.src !== avatarSrc) mobileAvatarEl.src = avatarSrc;
   document.getElementById("username").textContent = u.global_name || u.username;
 
@@ -385,8 +387,15 @@ function setTheme(name) {
   const base     = themes.midnight;
   const selected = themes[name] || base;
 
-  for (const key in base) root.style.setProperty(key, base[key]);
-  for (const key in selected) root.style.setProperty(key, selected[key]);
+  if (name === "pfp") {
+    const avatarEl = document.getElementById("avatarBig");
+    if (avatarEl && avatarEl.src && !avatarEl.src.endsWith("/")) {
+      applyDominantColorFromAvatar(avatarEl.src);
+    }
+  } else {
+    for (const key in base) root.style.setProperty(key, base[key]);
+    for (const key in selected) root.style.setProperty(key, selected[key]);
+  }
 
   localStorage.setItem("theme", name);
 }
@@ -410,7 +419,7 @@ document.getElementById("easterEgg").addEventListener("click", () => {
 });
 
 window.addEventListener("load", () => {
-  const saved = localStorage.getItem("theme") || "midnight";
+  const saved = localStorage.getItem("theme") || "pfp";
   setTheme(saved);
   setTimeout(updateThemeButtons, 100);
 });
