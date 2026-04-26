@@ -1,525 +1,425 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>aiden.dev</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Familjen+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body>
+const DISCORD_USER_ID = "853310319002517524";
 
-<header class="mobile-header">
-  <div class="mobile-header-left">
-    <img id="mobileAvatar" class="mobile-avatar" src="" alt="">
-    <div>
-      <div class="mobile-header-logo">aiden.dev</div>
-      <div class="mobile-header-sub">// 17 y/o dev</div>
-    </div>
-  </div>
-  <button class="mobile-settings-btn" onclick="openSettings()">
-    <i data-lucide="settings-2"></i>
-  </button>
-</header>
+function switchTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".nav-link").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".mobile-nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  const btn = document.getElementById("nav-" + id);
+  if (btn) btn.classList.add("active");
+  const mBtn = document.getElementById("mnav-" + id);
+  if (mBtn) mBtn.classList.add("active");
+  lucide.createIcons();
+}
 
-<nav class="mobile-nav">
-  <div class="mobile-nav-inner">
-    <button class="mobile-nav-btn" id="mnav-home" onclick="switchTab('home')">
-      <i data-lucide="terminal"></i>
-      <span>home</span>
-    </button>
-    <button class="mobile-nav-btn active" id="mnav-about" onclick="switchTab('about')">
-      <i data-lucide="user-circle"></i>
-      <span>about</span>
-    </button>
-    <button class="mobile-nav-btn" id="mnav-projects" onclick="switchTab('projects')">
-      <i data-lucide="layers"></i>
-      <span>projects</span>
-    </button>
-    <button class="mobile-nav-btn" id="mnav-friends" onclick="switchTab('friends')">
-      <i data-lucide="users-round"></i>
-      <span>friends</span>
-    </button>
-  </div>
-</nav>
+const STATUS_STYLES = {
+  online:  { bg: "rgba(93,186,126,0.12)",  border: "rgba(93,186,126,0.25)",  dot: "#5dba7e", text: "online"  },
+  idle:    { bg: "rgba(250,166,26,0.12)",  border: "rgba(250,166,26,0.25)",  dot: "#faa61a", text: "idle"    },
+  dnd:     { bg: "rgba(224,92,92,0.12)",   border: "rgba(224,92,92,0.25)",   dot: "#e05c5c", text: "dnd"     },
+  offline: { bg: "rgba(128,128,128,0.1)", border: "rgba(128,128,128,0.2)", dot: "#777",    text: "offline" },
+};
 
-<div class="shell">
+let ws;
+function connectLanyard() {
+  ws = new WebSocket("wss://api.lanyard.rest/socket");
+  ws.onopen    = () => ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: DISCORD_USER_ID } }));
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.op === 1) setInterval(() => ws.readyState === 1 && ws.send(JSON.stringify({ op: 3 })), msg.d.heartbeat_interval);
+    if (msg.op === 0) updatePresence(msg.d);
+  };
+  ws.onclose = () => setTimeout(connectLanyard, 3000);
+}
 
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-name">aiden.dev</div>
-      <div class="logo-sub">// 17 y/o dev</div>
-    </div>
+let allActivities = [];
+let currentActivityIndex = 0;
 
-    <nav class="nav-items">
-      <button onclick="switchTab('home')" class="nav-link" id="nav-home">
-        <i data-lucide="terminal"></i> home
-      </button>
-      <button onclick="switchTab('about')" class="nav-link active" id="nav-about">
-        <i data-lucide="user-circle"></i> about
-      </button>
-      <button onclick="switchTab('projects')" class="nav-link" id="nav-projects">
-        <i data-lucide="layers"></i> projects
-      </button>
-      <button onclick="switchTab('friends')" class="nav-link" id="nav-friends">
-        <i data-lucide="users-round"></i> friends
-      </button>
-    </nav>
+function resolveImg(raw, appId) {
+  if (!raw) return null;
+  if (raw.startsWith("http")) return raw;
+  if (raw.startsWith("mp:external/")) return "https://media.discordapp.net/external/" + raw.slice("mp:external/".length);
+  if (raw.startsWith("spotify:")) return "https://i.scdn.co/image/" + raw.slice("spotify:".length);
+  return `https://cdn.discordapp.com/app-assets/${appId}/${raw}.png`;
+}
 
-    <div class="sidebar-bottom">
-      <button class="settings-btn" onclick="openSettings()">
-        <i data-lucide="settings-2"></i> settings
-      </button>
-    </div>
-  </aside>
+function buildIconCandidates(act) {
+  const id = act.application_id;
+  return [
+    act.assets?.large_image && resolveImg(act.assets.large_image, id),
+    id && `https://cdn.discordapp.com/app-assets/${id}/icon.png`,
+    id && `https://cdn.discordapp.com/app-icons/${id}/icon.png`,
+    act.assets?.small_image && resolveImg(act.assets.small_image, id),
+  ].filter(Boolean);
+}
 
-  <main class="main">
+function displayActivity(index) {
+  if (!allActivities.length) return;
+  currentActivityIndex = Math.max(0, Math.min(index, allActivities.length - 1));
+  const act = allActivities[currentActivityIndex];
 
-    <div id="home" class="tab">
-      <div class="home-eyebrow">welcome</div>
-      <h1 class="home-title">Hey,<br>I'm <span>Aiden.</span></h1>
-      <p class="home-desc">17 year old dev. I break things,<br>then rebuild them better.</p>
-      <div class="home-actions">
-        <a href="#" onclick="switchTab('projects'); return false;" class="btn-amber">
-          <i data-lucide="arrow-right"></i> view work
-        </a>
-        <a href="#" onclick="switchTab('about'); return false;" class="btn-ghost">about me</a>
-      </div>
-      <div class="home-counter">
-        <div class="counter-item">
-          <div class="counter-num">3+</div>
-          <div class="counter-label">// projects</div>
-        </div>
-        <div class="counter-item">
-          <div class="counter-num">17</div>
-          <div class="counter-label">// years old</div>
-        </div>
-        <div class="counter-item">
-          <div class="counter-num">∞</div>
-          <div class="counter-label">// ideas</div>
-        </div>
-      </div>
-    </div>
+  const content = document.querySelector(".activity-content");
+  content.style.animation = "none";
+  setTimeout(() => { content.style.animation = "fadeInActivity 0.3s ease"; }, 10);
 
-    <div id="about" class="tab active">
-      <div class="section-tag">// about</div>
-      <h2 class="section-title">Who am I?</h2>
+  document.getElementById("activityName").textContent  = act.name    || "";
+  document.getElementById("activityState").textContent = act.details || act.state || "";
 
-      <canvas id="starCanvas" class="star-canvas"></canvas>
+  const icon = document.getElementById("activityIcon");
+  const candidates = buildIconCandidates(act);
+  const tryNext = (i) => {
+    if (i >= candidates.length) { icon.style.visibility = "hidden"; return; }
+    icon.style.visibility = "visible";
+    icon.onerror = () => tryNext(i + 1);
+    icon.src = candidates[i];
+  };
+  candidates.length ? tryNext(0) : (icon.style.visibility = "hidden");
 
-      <div class="about-grid">
+  document.getElementById("activityPrev").classList.toggle("disabled", currentActivityIndex === 0);
+  document.getElementById("activityNext").classList.toggle("disabled", currentActivityIndex === allActivities.length - 1);
+  document.getElementById("activityCounter").textContent = `${currentActivityIndex + 1}/${allActivities.length}`;
 
-        <div class="profile-card">
-          <div class="profile-banner-wrap">
-            <video class="profile-banner-video" autoplay loop muted playsinline>
-              <source src="video/banner.grey.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="profile-bottom">
-            <div class="avatar-wrap">
-              <img id="avatarBig" alt="avatar" src="">
-              <img id="avatarDecoration" class="avatar-decoration" src="" alt="" style="display:none;">
-            </div>
-            <div class="profile-meta">
-              <div class="profile-name-row">
-                <div id="username">Loading...</div>
-                <span class="guild-tag-wrap" id="guildTagWrap" style="display:none;">
-                  <img id="guildIcon" class="guild-icon" src="" alt="" style="display:none;">
-                  <span class="guild-tag" id="guildTag"></span>
-                </span>
-              </div>
-              <div class="profile-badges">
-                <span class="status-pill" id="statusPill">
-                  <span class="status-dot" id="statusDot"></span>
-                  <span id="statusText">offline</span>
-                </span>
-                <span class="badge">17 y/o dev</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  lucide.createIcons();
+}
 
-        <div id="activityCard" class="activity-card hidden" style="grid-column:1/-1;">
-          <button id="activityPrev" class="activity-nav" onclick="navigateActivity(-1)">
-            <i data-lucide="chevron-left"></i>
-          </button>
-          <div class="activity-content">
-            <div class="activity-thumb-wrap">
-              <img id="activityIcon" alt="">
-              <span class="activity-badge"></span>
-            </div>
-            <div class="activity-info">
-              <div class="activity-label">now playing</div>
-              <div id="activityName"></div>
-              <div id="activityState"></div>
-            </div>
-          </div>
-          <button id="activityNext" class="activity-nav" onclick="navigateActivity(1)">
-            <i data-lucide="chevron-right"></i>
-          </button>
-          <div class="activity-counter" id="activityCounter"></div>
-        </div>
+function navigateActivity(dir) {
+  const next = currentActivityIndex + dir;
+  if (next >= 0 && next < allActivities.length) displayActivity(next);
+}
 
-        <div class="about-text-card">
-          <div class="card-label">readme.md</div>
-          <p class="cycling-row">I like <span id="aboutWord">things</span></p>
-          <p id="aboutSentence">
-            Haii, I'm <strong>Aiden</strong> 17 years old and love breaking things then remaking them better.<br><br>
-            Currently working on this page and whatever else keeps me busy.
-          </p>
-          <br><br>
-          <p id="aboutSentence">
-            I mostly code in <b><u>Lua, Python, and Web</u></b>, but I'm always down to learn new languages and tools!<br><br>
-            I'm also super passionate about art and design, and love working on that whenever I can.
-          </p>
-        </div>
-
-        <div class="social-card">
-          <div class="card-label">find me</div>
-          <div class="social-list">
-
-            <a class="social-item social-item--discord" href="https://discord.com/users/853310319002517524" target="_blank">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;stroke:none;">
-                <path d="M19.73 4.87a18.2 18.2 0 0 0-4.6-1.44c-.21.4-.4.8-.58 1.21-1.69-.25-3.4-.25-5.1 0-.18-.41-.37-.82-.59-1.2-1.6.27-3.14.75-4.6 1.43A19.04 19.04 0 0 0 .96 17.7a18.43 18.43 0 0 0 5.63 2.87c.46-.62.86-1.28 1.2-1.98-.65-.25-1.29-.55-1.9-.92.17-.12.32-.24.47-.37 3.58 1.7 7.7 1.7 11.28 0l.46.37c-.6.36-1.25.67-1.9.92.35.7.75 1.35 1.2 1.98 2.03-.63 3.94-1.6 5.64-2.87.47-4.87-.78-9.09-3.3-12.83ZM8.3 15.12c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.89 2.27-2 2.27Zm7.4 0c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.88 2.27-2 2.27Z"/>
-              </svg>
-              <div>
-                <div class="social-item-name">Discord</div>
-                <div class="social-item-handle">@aexdm</div>
-              </div>
-              <span class="social-arrow"><i data-lucide="arrow-up-right"></i></span>
-            </a>
-
-            <a class="social-item social-item--twitter" href="#" target="_blank">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;stroke:none;">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.74-8.855L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/>
-              </svg>
-              <div>
-                <div class="social-item-name">Twitter</div>
-                <div class="social-item-handle">@aiden</div>
-              </div>
-              <span class="social-arrow"><i data-lucide="arrow-up-right"></i></span>
-            </a>
-
-            <a class="social-item social-item--github" href="https://github.com/aexdm" target="_blank">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;stroke:none;">
-                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-              </svg>
-              <div>
-                <div class="social-item-name">GitHub</div>
-                <div class="social-item-handle">aiden</div>
-              </div>
-              <span class="social-arrow"><i data-lucide="arrow-up-right"></i></span>
-            </a>
-
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div id="projects" class="tab">
-      <div class="section-tag">// projects</div>
-      <h2 class="section-title">What I've built</h2>
-
-      <div class="projects-grid">
-
-        <div class="project-card" data-project="AW : Heart Of The Unreturned">
-          <a href="https://www.roblox.com/games/132429881613824/ABYSS-WORLD-HOTU" class="project-card-ext" target="_blank" onclick="event.stopPropagation()">
-            <i data-lucide="arrow-up-right"></i>
-          </a>
-          <div class="project-card-preview">
-            <img src="https://tr.rbxcdn.com/180DAY-d6495b95d4dd31b15c745e4c72610278/930/480/Image/Png/noFilter" alt="HOTU preview">
-          </div>
-          <div class="project-card-body">
-            <div class="project-card-header">
-              <div class="project-card-icon">
-                <img src="https://tr.rbxcdn.com/180DAY-d6495b95d4dd31b15c745e4c72610278/930/480/Image/Png/noFilter" alt="">
-              </div>
-              <div>
-                <div class="project-card-name">AW : Heart Of The Unreturned</div>
-                <div class="project-card-eyebrow">// lua · roblox</div>
-              </div>
-            </div>
-            <div class="project-card-desc">A parkour fan game inspired by Abyss World. Built with a team.</div>
-            <div class="project-card-footer">
-              <span class="wip-badge">WORK IN PROGRESS</span>
-              <span class="lang-tag">Lua</span>
-            </div>
-          </div>
-        </div>
-
-
-
-        <div class="project-card" data-project="nigbot">
-          <a href="https://github.com/aexdm/nigbot" class="project-card-ext" target="_blank" onclick="event.stopPropagation()">
-            <i data-lucide="arrow-up-right"></i>
-          </a>
-          <div class="project-card-preview project-card-preview--nigbot">
-            <div class="nigbot-preview-bg">
-              <span class="nigbot-preview-text">[ nigbot ]</span>
-            </div>
-          </div>
-          <div class="project-card-body">
-            <div class="project-card-header">
-              <div class="project-card-icon" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(99,130,255,0.3);overflow:hidden;padding:0;">
-                <img id="nigbotCardIcon" src="https://cdn.discordapp.com/avatars/1449114322214326395/cb3cfb0cadfa6bcf839d4e02eb075838?size=256" alt="nigbot" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerText='🤖';">
-              </div>
-              <div>
-                <div class="project-card-name">nigbot</div>
-                <div class="project-card-eyebrow">// python · discord</div>
-              </div>
-            </div>
-            <div class="project-card-desc">A Discord bot that nukes channels on a set schedule. fire and forget.</div>
-            <div class="project-card-footer">
-              <span class="lang-tag">Python</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div id="friends" class="tab">
-      <div class="section-tag">// friends</div>
-      <h2 class="section-title">People I know</h2>
-
-      <div class="friends-wip">
-        <div class="friends-wip-terminal">
-          <div class="friends-wip-bar">
-            <span class="fwip-dot fwip-dot--red"></span>
-            <span class="fwip-dot fwip-dot--yellow"></span>
-            <span class="fwip-dot fwip-dot--green"></span>
-            <span class="fwip-terminal-title">friends.js</span>
-          </div>
-          <div class="friends-wip-body">
-            <p><span class="fwip-muted">// TODO: add my friends here</span></p>
-            <p><span class="fwip-key">const</span> friends <span class="fwip-op">=</span> <span class="fwip-bracket">[</span></p>
-            <p class="fwip-indent"><span class="fwip-comment">// ...loading</span></p>
-            <p><span class="fwip-bracket">]</span><span class="fwip-semi">;</span></p>
-            <br>
-            <p><span class="fwip-key">export default</span> <span class="fwip-fn">render</span><span class="fwip-bracket">(</span>friends<span class="fwip-bracket">)</span><span class="fwip-semi">;</span></p>
-            <p class="fwip-cursor-line"><span class="fwip-cursor">▋</span></p>
-          </div>
-        </div>
-        <div class="friends-wip-label">work in progress</div>
-        <div class="friends-wip-sub">check back later</div>
-      </div>
-
-      <div class="friends-grid" style="display:none;">
-
-        <div class="friend-card">
-          <div class="friend-banner">
-            <img src="https://i.imgur.com/placeholder.png" alt="" onerror="this.style.display='none'">
-            <div class="friend-banner-gradient"></div>
-          </div>
-          <div class="friend-body">
-            <div class="friend-top">
-              <img class="friend-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
-              <div>
-                <div class="friend-name">Display Name</div>
-                <div class="friend-username">@username</div>
-              </div>
-            </div>
-            <p class="friend-desc">Place holder</p>
-            <div class="friend-links">
-              <a href="#" class="friend-btn friend-btn--discord" target="_blank">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 24 24" style="stroke:none;"><path d="M19.73 4.87a18.2 18.2 0 0 0-4.6-1.44c-.21.4-.4.8-.58 1.21-1.69-.25-3.4-.25-5.1 0-.18-.41-.37-.82-.59-1.2-1.6.27-3.14.75-4.6 1.43A19.04 19.04 0 0 0 .96 17.7a18.43 18.43 0 0 0 5.63 2.87c.46-.62.86-1.28 1.2-1.98-.65-.25-1.29-.55-1.9-.92.17-.12.32-.24.47-.37 3.58 1.7 7.7 1.7 11.28 0l.46.37c-.6.36-1.25.67-1.9.92.35.7.75 1.35 1.2 1.98 2.03-.63 3.94-1.6 5.64-2.87.47-4.87-.78-9.09-3.3-12.83ZM8.3 15.12c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.89 2.27-2 2.27Zm7.4 0c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.88 2.27-2 2.27Z"/></svg>
-                Discord
-              </a>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<div id="easterEgg" class="easter-egg"></div>
-
-<audio id="amogus1" preload="auto">
-  <source src="sounds/amogus1.mp3" type="audio/mpeg">
-</audio>
-<audio id="amogus2" preload="auto">
-  <source src="sounds/amogus2.mp3" type="audio/mpeg">
-</audio>
-<audio id="amogus3" preload="auto">
-  <source src="sounds/amogus3.mp3" type="audio/mpeg">
-</audio>
-
-<div id="projectModal" class="modal">
-  <div class="pmodal-shell">
-
-    <div class="pmodal-gallery-col">
-      <div class="pmodal-gallery-main">
-        <img id="pModalImgMain" src="" alt="">
-        <div class="pmodal-gallery-overlay"></div>
-      </div>
-      <div class="pmodal-gallery-thumbs" id="pModalThumbs">
-        <img class="pmodal-thumb active" data-idx="0" src="" alt="">
-        <img class="pmodal-thumb" data-idx="1" src="" alt="">
-        <img class="pmodal-thumb" data-idx="2" src="" alt="">
-        <img class="pmodal-thumb" data-idx="3" src="" alt="">
-      </div>
-    </div>
-
-    <div class="pmodal-info-col">
-      <div class="pmodal-top-bar">
-        <span class="pmodal-eyebrow" id="pModalLang">// lua</span>
-        <button class="pmodal-close-btn" onclick="closeProjectModal()">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-      <h2 class="pmodal-title" id="pModalTitle">Project Title</h2>
-      <p class="pmodal-subtitle" id="pModalIntro">Short intro here.</p>
-      <div class="pmodal-divider"></div>
-      <p class="pmodal-desc" id="pModalDescription">Description goes here.</p>
-      <div class="pmodal-divider"></div>
-      <div class="pmodal-roadmap-label">// roadmap</div>
-      <div class="pmodal-tabs" id="pModalTabBtns"></div>
-      <div class="pmodal-roadmap-content" id="pModalRoadmapContent"></div>
-      <a id="pModalAction" href="#" class="btn-amber pmodal-action-btn" target="_blank">
-        <i data-lucide="arrow-up-right"></i>
-        <span id="pModalActionLabel">View Project</span>
-      </a>
-    </div>
-
-  </div>
-</div>
-
-<div id="settingsModal" class="modal">
-  <div class="modal-box">
-    <h2>Settings</h2>
-    <p>Choose your theme</p>
-    <div class="theme-grid">
-      <button onclick="setTheme('midnight'); updateThemeButtons();">Midnight</button>
-      <button onclick="setTheme('orange'); updateThemeButtons();">Orange</button>
-      <button onclick="setTheme('red'); updateThemeButtons();">Red</button>
-      <button onclick="setTheme('blue'); updateThemeButtons();">Blue</button>
-      <button onclick="setTheme('green'); updateThemeButtons();">Green</button>
-      <button onclick="setTheme('purple'); updateThemeButtons();">Purple</button>
-      <button onclick="setTheme('pink'); updateThemeButtons();">Pink</button>
-      <button onclick="setTheme('cyan'); updateThemeButtons();">Cyan</button>
-      <button onclick="setTheme('rose'); updateThemeButtons();">Rose</button>
-    </div>
-    <button onclick="closeSettings()" style="background:var(--amber);color:var(--bg);border:none;">Close</button>
-  </div>
-</div>
-
-
-<script>
-(function() {
-  const vid = document.querySelector('.profile-banner-video');
-  if (!vid) return;
-  vid.muted = true;
-  const tryPlay = () => vid.play().catch(() => {});
-  tryPlay();
-  document.addEventListener('click', tryPlay, { once: true });
-  document.addEventListener('touchstart', tryPlay, { once: true });
-
-  vid.style.transition = 'opacity 0.6s ease';
-  vid.addEventListener('timeupdate', () => {
-    const remaining = vid.duration - vid.currentTime;
-    if (remaining < 0.7) {
-      vid.style.opacity = '0';
+function applyDominantColorFromAvatar(imgSrc) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const size = 64;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, size, size);
+    const data = ctx.getImageData(0, 0, size, size).data;
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const alpha = data[i + 3];
+      if (alpha < 128) continue; 
+      r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
     }
-  });
-  vid.addEventListener('seeked', () => {
-    if (vid.currentTime < 0.5) {
-      vid.style.opacity = '1';
-    }
-  });
-})();
-</script>
-<script src="index.js"></script>
-<script>lucide.createIcons();</script>
+    if (!count) return;
+    r = Math.round(r / count);
+    g = Math.round(g / count);
+    b = Math.round(b / count);
+    const darken = (v, f) => Math.max(0, Math.min(255, Math.round(v * f)));
+    const bgR = darken(r, 0.15), bgG = darken(g, 0.15), bgB = darken(b, 0.15);
+    const bg2R = darken(r, 0.22), bg2G = darken(g, 0.22), bg2B = darken(b, 0.22);
+    const cardR = darken(r, 0.28), cardG = darken(g, 0.28), cardB = darken(b, 0.28);
+    const amberR = Math.min(255, r + 40), amberG = Math.min(255, g + 40), amberB = Math.min(255, b + 40);
+    const root = document.documentElement;
+    root.style.setProperty("--bg",   `rgb(${bgR},${bgG},${bgB})`);
+    root.style.setProperty("--bg2",  `rgb(${bg2R},${bg2G},${bg2B})`);
+    root.style.setProperty("--card", `rgb(${cardR},${cardG},${cardB})`);
+    root.style.setProperty("--card-hover", `rgb(${darken(r,0.35)},${darken(g,0.35)},${darken(b,0.35)})`);
+    root.style.setProperty("--border",  `rgba(${r},${g},${b},0.15)`);
+    root.style.setProperty("--border2", `rgba(${r},${g},${b},0.28)`);
+    root.style.setProperty("--amber",     `rgb(${amberR},${amberG},${amberB})`);
+    root.style.setProperty("--amber-dim",  `rgba(${r},${g},${b},0.13)`);
+    root.style.setProperty("--amber-dim2", `rgba(${r},${g},${b},0.24)`);
+    root.style.setProperty("--banner-tint", `rgba(${r},${g},${b},0.85)`);
+  };
+  img.src = imgSrc;
+}
 
-<script>
-
-(function initStars() {
-  const canvas = document.getElementById('starCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  function resize() {
-    canvas.width  = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+function updatePresence(d) {
+  const u = d.discord_user;
+  const avatarEl = document.getElementById("avatarBig");
+  const mobileAvatarEl = document.getElementById("mobileAvatar");
+  const avatarHash = u.avatar;
+  const avatarExt = avatarHash && avatarHash.startsWith("a_") ? "gif" : "png";
+  const avatarSrc = avatarHash
+    ? `https://cdn.discordapp.com/avatars/${u.id}/${avatarHash}.${avatarExt}?size=256`
+    : `https://cdn.discordapp.com/embed/avatars/${(BigInt(u.id) >> 22n) % 6n}.png`;
+  if (avatarEl && avatarEl.src !== avatarSrc) {
+  avatarEl.src = avatarSrc;
+  if ((localStorage.getItem("theme") || "pfp") === "pfp") {
+    applyDominantColorFromAvatar(avatarSrc);
   }
-  resize();
-  window.addEventListener('resize', resize);
+}
+  if (mobileAvatarEl && mobileAvatarEl.src !== avatarSrc) mobileAvatarEl.src = avatarSrc;
+  document.getElementById("username").textContent = u.global_name || u.username;
 
-  function drawStar(ctx, x, y, size, opacity) {
-    const spikes = 5;
-    const outerR = size;
-    const innerR = size * 0.45;
-    let rot = (Math.PI / 2) * 3;
-    const step = Math.PI / spikes;
-    ctx.beginPath();
-    ctx.moveTo(x, y - outerR);
-    for (let i = 0; i < spikes; i++) {
-      ctx.lineTo(x + Math.cos(rot) * outerR, y + Math.sin(rot) * outerR);
-      rot += step;
-      ctx.lineTo(x + Math.cos(rot) * innerR, y + Math.sin(rot) * innerR);
-      rot += step;
+  const decorEl = document.getElementById("avatarDecoration");
+  if (decorEl) {
+    const decoData = u.avatar_decoration_data;
+    if (decoData && decoData.asset) {
+      decorEl.src = `https://cdn.discordapp.com/avatar-decoration-presets/${decoData.asset}.png`;
+      decorEl.style.display = "";
+    } else {
+      decorEl.style.display = "none";
     }
-    ctx.closePath();
-    ctx.fillStyle = `rgba(255,245,210,${opacity})`;
-    ctx.fill();
-    ctx.shadowColor = `rgba(255,230,150,${opacity * 0.6})`;
-    ctx.shadowBlur = size * 2.5;
-    ctx.fill();
-    ctx.shadowBlur = 0;
   }
 
-  const STAR_COUNT = 18;
-  const stars = [];
+  const guildTagEl  = document.getElementById("guildTag");
+  const guildIconEl = document.getElementById("guildIcon");
+  const wrapEl      = document.getElementById("guildTagWrap");
+  const guild = u.primary_guild;
 
-  function newStar() {
-    return {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 7 + 3,
-      speed: Math.random() * 0.8 + 0.4,
-      opacity: Math.random() * 0.5 + 0.25,
-      twinkleSpeed: Math.random() * 0.025 + 0.006,
-      twinkleOff: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.025,
-      rot: Math.random() * Math.PI * 2,
-    };
-  }
-
-  for (let i = 0; i < STAR_COUNT; i++) stars.push(newStar());
-
-  let frame = 0;
-  function tick() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    frame++;
-    for (const s of stars) {
-      s.y -= s.speed;
-      s.rot += s.rotSpeed;
-      if (s.y < -s.size * 2) {
-        s.x = Math.random() * canvas.width;
-        s.y = canvas.height + s.size * 2;
-        s.size = Math.random() * 7 + 3;
-        s.speed = Math.random() * 0.8 + 0.4;
-        s.opacity = Math.random() * 0.5 + 0.25;
+  if (guild && guild.tag) {
+    if (guildTagEl) { guildTagEl.textContent = guild.tag; guildTagEl.style.display = ""; }
+    if (wrapEl) wrapEl.style.display = "";
+    if (guildIconEl) {
+      const iconHash = guild.badge;
+      const guildId  = guild.identity_guild_id;
+      if (iconHash && guildId) {
+        guildIconEl.src = `https://cdn.discordapp.com/clan-badges/${guildId}/${iconHash}.png?size=32`;
+        guildIconEl.style.display = "";
+        guildIconEl.onerror = () => { guildIconEl.style.display = "none"; };
+      } else {
+        guildIconEl.style.display = "none";
       }
-      const twinkle = 0.7 + 0.3 * Math.sin(frame * s.twinkleSpeed + s.twinkleOff);
-
-      ctx.save();
-      ctx.translate(s.x, s.y);
-      ctx.rotate(s.rot);
-      ctx.translate(-s.x, -s.y);
-      drawStar(ctx, s.x, s.y, s.size, s.opacity * twinkle);
-      ctx.restore();
     }
-    requestAnimationFrame(tick);
+  } else {
+    if (guildTagEl) guildTagEl.style.display = "none";
+    if (guildIconEl) guildIconEl.style.display = "none";
+    if (wrapEl) wrapEl.style.display = "none";
   }
-  tick();
-})();
-</script>
-</body>
-</html>
+
+  const s = STATUS_STYLES[d.discord_status] || STATUS_STYLES.offline;
+  const pill = document.getElementById("statusPill");
+  pill.style.background   = s.bg;
+  pill.style.borderColor  = s.border;
+  pill.style.color        = s.dot;
+  document.getElementById("statusDot").style.background = s.dot;
+  document.getElementById("statusText").textContent     = s.text;
+
+  let activities = d.activities?.filter(a => a.type === 0 || a.type === 2) || [];
+
+  if (d.spotify && !activities.find(a => a.type === 2 && a.name === "Spotify")) {
+    const sp = d.spotify;
+    activities = [{
+      name: "Spotify", details: sp.song, state: sp.artist,
+      type: 2, assets: { large_image: sp.album_art_url },
+    }, ...activities];
+  }
+
+  const card = document.getElementById("activityCard");
+  if (activities.length) {
+    allActivities = activities;
+    currentActivityIndex = 0;
+    card.classList.remove("hidden");
+    displayActivity(0);
+  } else {
+    card.classList.add("hidden");
+    allActivities = [];
+  }
+}
+
+connectLanyard();
+
+function openSettings()  { document.getElementById("settingsModal").classList.add("open"); }
+function closeSettings() { document.getElementById("settingsModal").classList.remove("open"); }
+document.getElementById("settingsModal").addEventListener("click", e => {
+  if (e.target.id === "settingsModal") closeSettings();
+});
+
+const projectData = {
+  "AW : Heart Of The Unreturned": {
+    lang: "// lua",
+    intro: "A Roblox fan game based on Abyss World. Built with a team.",
+    description: "Heart Of The Unreturned is a Parkour Roblox fan game inspired by Abyss World. Currently in active development — I mostly did bug fixes",
+    images: [
+      "images/hotu1.png",
+      "images/hotu2.png",
+      "images/hotu3.png",
+      "images/hotu4.png",
+    ],
+    action: { label: "Play on Roblox", href: "https://www.roblox.com/games/132429881613824/ABYSS-WORLD-HOTU" },
+    roadmap: [
+      { cat: "Movement",   title: "Core Gameplay", desc: "Everything related to player control and movement.",       items: ["Press and hold jumping system", "Momentum system and checkpoint system"], status: "done" },
+      { cat: "Environment", title: "Zones",  desc: "Different layers of the map.",         items: ["Multiple terrain themes", "Lighting setup and map variation"],                          status: "done" },
+      { cat: "Art",         title: "Enemy Roster",  desc: "Sculpt and rig all enemy types.",     items: ["Multiple enemy variants with rigs", "Texturing and polish work"],                       status: "wip"  },
+      { cat: "GUI",         title: "Upgrade Menu",  desc: "Card-based tower upgrade system.",    items: ["Card-based upgrade UI", "Tier 1–4 management"],                                         status: "wip"  },
+    ],
+  },
+  "nigbot": {
+    lang: "// python · discord",
+    intro: "A Discord bot that nukes channels on a set schedule.",
+    description: "nigbot is a selfbot/Discord bot that deletes and recreates channels at whatever interval you set. built it for fun, runs off a simple config. does what it says on the tin.",
+    images: [
+      "https://opengraph.githubassets.com/1/aexdm/nigbot",
+    ],
+    action: { label: "View on GitHub", href: "https://github.com/aexdm/nigbot" },
+    roadmap: [],
+    botAvatarId: "1309568330397761596", 
+  },
+};
+
+function openProjectModal(projectName) {
+  const data = projectData[projectName] || {};
+  const placeholder = "https://tr.rbxcdn.com/180DAY-d6495b95d4dd31b15c745e4c72610278/930/480/Image/Png/noFilter";
+  const images = data.images?.length ? data.images : [placeholder, placeholder, placeholder, placeholder];
+
+  document.getElementById("pModalLang").textContent        = data.lang        || "// project";
+  document.getElementById("pModalTitle").textContent       = projectName;
+  document.getElementById("pModalIntro").textContent       = data.intro        || "";
+  document.getElementById("pModalDescription").textContent = data.description  || "";
+
+  const mainImg = document.getElementById("pModalImgMain");
+  mainImg.src = images[0];
+  document.querySelectorAll(".pmodal-thumb").forEach((thumb, i) => {
+    thumb.src           = images[i] || images[0];
+    thumb.style.display = images[i] ? "block" : "none";
+    thumb.classList.toggle("active", i === 0);
+    thumb.onclick = () => {
+      mainImg.style.opacity = "0";
+      setTimeout(() => { mainImg.src = images[i]; mainImg.style.opacity = "1"; }, 150);
+      document.querySelectorAll(".pmodal-thumb").forEach(x => x.classList.remove("active"));
+      thumb.classList.add("active");
+    };
+  });
+
+  document.getElementById("pModalActionLabel").textContent = data.action?.label || "View Project";
+  document.getElementById("pModalAction").href             = data.action?.href  || "#";
+
+  const tabBtns        = document.getElementById("pModalTabBtns");
+  const roadmapContent = document.getElementById("pModalRoadmapContent");
+  tabBtns.innerHTML        = "";
+  roadmapContent.innerHTML = "";
+
+  const roadmap = data.roadmap || [];
+  if (!roadmap.length) {
+    roadmapContent.innerHTML = `<p style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">// no roadmap yet</p>`;
+  } else {
+    roadmap.forEach((item, i) => {
+      const btn = document.createElement("button");
+      btn.className = "pmodal-tab-btn" + (i === 0 ? " active" : "");
+      btn.textContent = item.cat;
+      btn.onclick = () => {
+        tabBtns.querySelectorAll(".pmodal-tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        roadmapContent.querySelectorAll(".pmodal-roadmap-panel").forEach(p => p.classList.remove("active"));
+        document.getElementById(`pRoadmapPanel-${i}`).classList.add("active");
+      };
+      tabBtns.appendChild(btn);
+
+      const statusClass = item.status === "done" ? "pmodal-status-done" : "pmodal-status-wip";
+      const statusText  = item.status === "done" ? "done" : "in progress";
+      const panel = document.createElement("div");
+      panel.className = "pmodal-roadmap-panel" + (i === 0 ? " active" : "");
+      panel.id = `pRoadmapPanel-${i}`;
+      panel.innerHTML = `
+        <div class="pmodal-roadmap-card">
+          <div class="pmodal-roadmap-card-title">${item.title}</div>
+          <div class="pmodal-roadmap-card-desc">${item.desc}</div>
+          <ul>${item.items.map(li => `<li>${li}</li>`).join("")}</ul>
+          <span class="${statusClass}">${statusText}</span>
+        </div>`;
+      roadmapContent.appendChild(panel);
+    });
+  }
+
+  document.getElementById("projectModal").classList.add("open");
+  lucide.createIcons();
+}
+
+function closeProjectModal() { document.getElementById("projectModal").classList.remove("open"); }
+document.getElementById("projectModal").addEventListener("click", e => {
+  if (e.target.id === "projectModal") closeProjectModal();
+});
+
+document.querySelectorAll(".project-row, .project-card").forEach(row => {
+  row.addEventListener("click", e => {
+    e.preventDefault();
+    const name = row.dataset.project || row.querySelector(".project-name, .project-card-name")?.textContent?.trim() || "";
+    openProjectModal(name);
+  });
+});
+
+const cycleWords = [
+  "MY BED I LOVE IT", "money", "roblox", "art", "my friends", "code",
+  "my phone", "drawing", "fashion", "chaos", "summer",
+  "Tyler The Creator", "anime", "memes", "food", "sleep",
+  "cats", "the vibe", "aidenhub.dev",
+];
+let wordIndex = 0;
+setInterval(() => {
+  const el = document.getElementById("aboutWord");
+  if (!el) return;
+  el.style.opacity   = "0";
+  el.style.transform = "translateY(-5px)";
+  setTimeout(() => {
+    el.textContent     = cycleWords[wordIndex];
+    el.style.opacity   = "1";
+    el.style.transform = "translateY(0)";
+    wordIndex = (wordIndex + 1) % cycleWords.length;
+  }, 220);
+}, 1800);
+
+const themes = {
+  midnight: {
+    "--bg": "#070a14", "--bg2": "#0d1120", "--card": "#111827", "--card-hover": "#1a2540",
+    "--border": "rgba(99,130,255,0.1)", "--border2": "rgba(99,130,255,0.2)",
+    "--text": "#e8ecff", "--muted": "rgba(180,190,255,0.45)",
+    "--amber": "#6384ff", "--amber-dim": "rgba(99,130,255,0.12)", "--amber-dim2": "rgba(99,130,255,0.22)",
+    "--green": "#4dd8ad", "--green-dim": "rgba(77,216,173,0.12)",
+  },
+  orange: {
+    "--bg": "#0c0c0b", "--bg2": "#111110", "--card": "#161614", "--card-hover": "#1c1c19",
+    "--border": "rgba(255,245,210,0.08)", "--border2": "rgba(255,245,210,0.15)",
+    "--text": "#f5f0e8", "--muted": "rgba(245,240,232,0.4)",
+    "--amber": "#e8a030", "--amber-dim": "rgba(232,160,48,0.1)", "--amber-dim2": "rgba(232,160,48,0.18)",
+    "--green": "#5dba7e", "--green-dim": "rgba(93,186,126,0.12)",
+  },
+  red:      { "--amber": "#ff4d4d" },
+  blue:     { "--amber": "#4da6ff" },
+  green:    { "--amber": "#5dba7e" },
+  purple:   { "--amber": "#d946ef" },
+  pink:     { "--amber": "#ec4899" },
+  cyan:     { "--amber": "#06b6d4" },
+  rose: {
+    "--bg": "#120a0d", "--bg2": "#1e1015", "--card": "#2a1520", "--card-hover": "#361a28",
+    "--border": "rgba(251,113,133,0.1)", "--border2": "rgba(251,113,133,0.2)",
+    "--text": "#ffe8ed", "--muted": "rgba(255,180,195,0.45)",
+    "--amber": "#fb7185", "--amber-dim": "rgba(251,113,133,0.12)", "--amber-dim2": "rgba(251,113,133,0.22)",
+    "--green": "#f472b6", "--green-dim": "rgba(244,114,182,0.12)",
+  },
+};
+
+function setTheme(name) {
+  const root     = document.documentElement;
+  const base     = themes.midnight;
+  const selected = themes[name] || base;
+
+  if (name === "pfp") {
+    const avatarEl = document.getElementById("avatarBig");
+    if (avatarEl && avatarEl.src && !avatarEl.src.endsWith("/")) {
+      applyDominantColorFromAvatar(avatarEl.src);
+    }
+  } else {
+    for (const key in base) root.style.setProperty(key, base[key]);
+    for (const key in selected) root.style.setProperty(key, selected[key]);
+  }
+
+  localStorage.setItem("theme", name);
+}
+
+function updateThemeButtons() {
+  const saved = localStorage.getItem("theme") || "default";
+  document.querySelectorAll(".theme-grid button").forEach(btn => {
+    btn.classList.remove("active-theme");
+  });
+  const active = document.querySelector(`.theme-grid button[onclick*="setTheme('${saved}')"]`);
+  if (active) active.classList.add("active-theme");
+}
+
+const eggSounds = ["amogus1", "amogus2", "amogus3"];
+document.getElementById("easterEgg").addEventListener("click", () => {
+  const id    = eggSounds[Math.floor(Math.random() * eggSounds.length)];
+  const audio = document.getElementById(id);
+  if (!audio) return;
+  audio.currentTime = 0;
+  audio.play().catch(() => {}); 
+});
+
+window.addEventListener("load", () => {
+  const saved = localStorage.getItem("theme") || "pfp";
+  setTheme(saved);
+  setTimeout(updateThemeButtons, 100);
+});
