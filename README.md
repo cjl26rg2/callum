@@ -1,70 +1,65 @@
-// portfolio
-hey, i'm aiden 👋  
-developer · i build web + game systems
+# hey, i'm aiden
 
-Discord · GitHub · Open to collabs
+developer · building web systems, game systems, and interactive tools
+
+Discord · GitHub · open to collabs
 
 ---
 
-## // about this site
+## about this site
 
 this is my personal portfolio website.
 
-it’s a place where i:
-- show my projects (web apps, roblox games, tools, experiments)
-- share what i’m currently working on
-- display live discord presence + activity
-- experiment with UI/interactive design systems
+it’s not just a list of projects. it’s more of a living space where i show how i actually build things.
 
-the goal isn’t just to “list projects”, but to show how I build things in real time.
+what you’ll find here:
+
+- projects (web apps, roblox games, tools, experiments)
+- what i’m currently working on
+- live discord presence and activity
+- interactive UI experiments and system design
+
+the focus isn’t on presentation alone, but on process. how things are built, not just what’s finished.
 
 ---
 
-## const aiden = {
+## about me
+
+```js
+const aiden = {
   role: "developer",
   focus: ["web", "lua", "python", "game systems"],
   mindset: "learn by building",
   interests: ["design", "games", "creative coding", "music"],
-  current: "building projects & improving systems",
-  note: "aiden is a pseudonym — my real name is Adam, but only a few people know that"
+  current: "building projects and improving systems"
 }
 
-i’m a developer who learns by building things from scratch.
+i learn by building things from scratch.
 
-“aiden” is the name i use online — my real name is Adam, but i keep that mostly private.
+i don’t really stick to tutorials or theory for long — i usually just start building, break things, and figure them out as i go.
 
-most of my work is in:
-- Lua (Roblox / game systems)
-- JavaScript (web apps & UI systems)
-- Python (automation / tools)
+name
 
-i like experimenting with interactive UI, systems design, and making small ideas feel polished.
+aiden is a pseudonym i use online.
 
----
+my real name is adam, but i keep that separate and only a few people know it.
 
-## // what you'll find here
+stack
 
-- projects with detailed breakdowns
-- interactive UI (modals, command palette, animations)
-- live discord presence integration
-- theme system (including avatar-based theme colors)
-- terminal-style home + boot sequence experience
+lua · javascript · python · html · css
 
----
+what this site includes
+live discord status and activity
+project modals with images and details
+theme system with dynamic styling
+command palette for navigation
+terminal-style landing experience
+keyboard shortcuts and interactions
+stats
 
-## // stack
+github stats
+top languages
 
-Lua · Python · JavaScript · HTML · CSS
+closing
 
----
-
-## // stats
-
-GitHub stats  
-Top languages  
-
----
-
-## // closing
-
-aiden.dev · building things & learning as I go
+aiden.dev — building things and improving as i go
