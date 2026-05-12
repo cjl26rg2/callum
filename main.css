@@ -965,7 +965,7 @@ body::before {
 #projectModal.open .pmodal-shell { transform: scale(1) translateY(0); }
 .pmodal-gallery-col { display: flex; flex-direction: column; background: #080610; border-right: 1px solid var(--border); overflow: hidden; }
 .pmodal-gallery-main { position: relative; flex: 1; overflow: hidden; min-height: 0; }
-.pmodal-gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.25s ease; }
+.pmodal-gallery-main img { width: 100%; height: 100%; object-fit: contain; display: block; background: #050505; transition: opacity 0.25s ease; }
 .pmodal-gallery-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,6,16,0.7) 0%, transparent 40%); pointer-events: none; }
 .pmodal-gallery-thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 8px; background: var(--bg2); border-top: 1px solid var(--border); flex-shrink: 0; }
 .pmodal-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; border: 1.5px solid transparent; cursor: pointer; opacity: 0.4; transition: all 0.18s; }
@@ -988,7 +988,7 @@ body::before {
 .pmodal-tab-btn { font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border); background: rgba(212,184,255,0.03); color: var(--muted); cursor: pointer; transition: all 0.18s; }
 .pmodal-tab-btn:hover { color: var(--text); border-color: var(--border2); }
 .pmodal-tab-btn.active { background: var(--amber-dim); border-color: var(--amber-dim2); color: var(--amber); }
-.pmodal-roadmap-content { flex: 1; min-height: 0; }
+.pmodal-roadmap-content { flex: 0 0 auto; min-height: 0; }
 .pmodal-roadmap-panel { display: none; animation: fadeIn 0.22s ease; }
 .pmodal-roadmap-panel.active { display: block; }
 .pmodal-roadmap-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
@@ -999,7 +999,7 @@ body::before {
 .pmodal-roadmap-card ul li::before { content: '✦'; position: absolute; left: 0; color: var(--amber); font-size: 8px; top: 2px; opacity: 0.6; }
 .pmodal-status-done { display: inline-block; font-family: var(--mono); font-size: 9.5px; color: var(--green); background: rgba(245,184,212,0.08); border: 1px solid rgba(245,184,212,0.2); padding: 3px 10px; border-radius: 999px; }
 .pmodal-status-wip { display: inline-block; font-family: var(--mono); font-size: 9.5px; color: #ffd4a8; background: rgba(255,212,168,0.08); border: 1px solid rgba(255,212,168,0.2); padding: 3px 10px; border-radius: 999px; }
-.pmodal-action-btn { margin-top: 18px; width: 100%; justify-content: center; font-size: 12px; }
+.pmodal-action-btn { margin-top: 18px; width: 100%; justify-content: center; font-size: 12px; flex-shrink: 0; }
 
 .boot-progress, .boot-progress-fill, .boot-progress-pct { display: none !important; }
 
