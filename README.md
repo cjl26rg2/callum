@@ -1,65 +1,57 @@
-# hey, i'm aiden
+```
+hey, i'm Aiden.
+```
 
-developer · building web systems, game systems, and interactive tools
-
-Discord · GitHub · open to collabs
-
----
-
-## about this site
-
-this is my personal portfolio website.
-
-it’s not just a list of projects. it’s more of a living space where i show how i actually build things.
-
-what you’ll find here:
-
-- projects (web apps, roblox games, tools, experiments)
-- what i’m currently working on
-- live discord presence and activity
-- interactive UI experiments and system design
-
-the focus isn’t on presentation alone, but on process. how things are built, not just what’s finished.
+developer · building web systems, game systems, and interactive tools · open to collabs
 
 ---
-
-## about me
 
 ```js
 const aiden = {
-  role: "developer",
-  focus: ["web", "lua", "python", "game systems"],
-  mindset: "learn by building",
+  role:      "developer",
+  focus:     ["web", "lua", "python", "game systems"],
+  mindset:   "learn by building",
   interests: ["design", "games", "creative coding", "music"],
-  current: "building projects and improving systems"
+  current:   "building projects and improving systems"
 }
+```
 
-i learn by building things from scratch.
+> **Aiden** is a pseudonym i use online. my real name is Adam only a few people know that, and i like it that way.
 
-i don’t really stick to tutorials or theory for long — i usually just start building, break things, and figure them out as i go.
+---
 
-name
+### // about this site
 
-aiden is a pseudonym i use online.
+not just a list of projects — more of a living space that shows how i actually build things. the focus is on process: how things are built, not just what's finished.
 
-my real name is adam, but i keep that separate and only a few people know it.
+| what's here | |
+|---|---|
+| projects | web apps, roblox games, tools, experiments |
+| live presence | discord status and activity, live |
+| theme system | dynamic styling with dominant color from pfp |
+| keyboard shortcuts | full keyboard control + `?` help overlay |
+| terminal landing | typewriter-style home screen |
 
-stack
+---
 
-lua · javascript · python · html · css
+### // stack
 
-what this site includes
-live discord status and activity
-project modals with images and details
-theme system with dynamic styling
-command palette for navigation
-terminal-style landing experience
-keyboard shortcuts and interactions
-stats
+`lua` · `javascript` · `python` · `html` · `css` · `php`
 
-github stats
-top languages
+---
 
-closing
+### // how i work
 
-aiden.dev — building things and improving as i go
+i don't stick to tutorials or theory for long  i usually just start building, and figure them out as i go. everything on this site was built that way.
+
+---
+
+### // links
+
+- [aiden.dev](https://aiden.dev)
+- [github](https://github.com/aidenhub)
+- discord — find me on the site
+
+---
+
+<sub>aiden.dev — building things and improving as i go</sub>
