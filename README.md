@@ -48,7 +48,7 @@ i don't stick to tutorials or theory for long  i usually just start building, an
 
 ### // links
 
-- [aiden.dev]([https://aiden.dev](http://aidendev.42web.io/))
+- [aiden.dev](https://aidendev.42web.io/)
 - [github](https://github.com/aexdm)
 - discord — find me on the site
 
