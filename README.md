@@ -1,5 +1,5 @@
 ```
-hey, i'm Aiden.
+hey, i'm Adam.
 ```
 
 developer · building web systems, game systems, and interactive tools · open to collabs
@@ -16,7 +16,7 @@ const aiden = {
 }
 ```
 
-> **Aiden** is a pseudonym i use online. my real name is Adam only a few people know that, and i like it that way.
+> **Aiden** is a pseudonym I really like.
 
 ---
 
@@ -48,10 +48,10 @@ i don't stick to tutorials or theory for long  i usually just start building, an
 
 ### // links
 
-- [aiden.dev](https://aidendev.42web.io/)
+- [adamdev](https://adamdev.42web.io/)
 - [github](https://github.com/aexdm)
 - discord — find me on the site
 
 ---
 
-<sub>aiden.dev — building things and improving as i go</sub>
+<sub>adamdev — building things and improving as i go</sub>
