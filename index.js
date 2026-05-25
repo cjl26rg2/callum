@@ -129,7 +129,7 @@ function applyDominantColorFromAvatar(imgSrc) {
 }
 
 function updatePresence(d) {
-  const u = d.discord_user;
+  const u = d.discorduser || {};
   const avatarEl = document.getElementById("avatarBig");
   const mobileAvatarEl = document.getElementById("mobileAvatar");
   const avatarHash = u?.avatar;
