@@ -132,7 +132,7 @@ function updatePresence(d) {
   const u = d.discord_user;
   const avatarEl = document.getElementById("avatarBig");
   const mobileAvatarEl = document.getElementById("mobileAvatar");
-  const avatarHash = u.avatar;
+  const avatarHash = u?.avatar;
   const avatarExt = avatarHash && avatarHash.startsWith("a_") ? "gif" : "png";
   const avatarSrc = avatarHash
     ? `https://cdn.discordapp.com/avatars/${u.id}/${avatarHash}.${avatarExt}?size=256`
