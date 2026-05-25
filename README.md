@@ -16,7 +16,7 @@ const aiden = {
 }
 ```
 
-> **Aiden** is a pseudonym I really like.
+> **CJ** is a Display I really like.
 
 ---
 
@@ -55,3 +55,4 @@ i don't stick to tutorials or theory for long  i usually just start building, an
 ---
 
 <sub>adamdev — building things and improving as i go</sub>
+made by adam :D
