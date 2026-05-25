@@ -1,4 +1,4 @@
-const DISCORD_USER_ID = "";
+const DISCORD_USER_ID = "1344347459857678389";
 
 function switchTab(id) {
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
