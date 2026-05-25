@@ -151,6 +151,7 @@ function updatePresence(d) {
       applyDominantColorFromAvatar(avatarSrc);
     }
   }
+}
   if (mobileAvatarEl && mobileAvatarEl.src !== avatarSrc) mobileAvatarEl.src = avatarSrc;
   document.getElementById("username").textContent = u.global_name || u.username;
 
