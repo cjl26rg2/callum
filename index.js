@@ -130,19 +130,27 @@ function applyDominantColorFromAvatar(imgSrc) {
 
 function updatePresence(d) {
   const u = d.discorduser || {};
+
   const avatarEl = document.getElementById("avatarBig");
   const mobileAvatarEl = document.getElementById("mobileAvatar");
-  const avatarHash = u?.avatar;
-  const avatarExt = avatarHash && avatarHash.startsWith("a_") ? "gif" : "png";
+
+  if (!u.id) return;
+
+  const avatarHash = u.avatar;
+  const avatarExt =
+    avatarHash && avatarHash.startsWith("a") ? "gif" : "png";
+
   const avatarSrc = avatarHash
-    ? `https://cdn.discordapp.com/avatars/${u.id}/${avatarHash}.${avatarExt}?size=256`
+    ? `https://cdn.discordapp.com/avatars/$%7Bu.id%7D/$%7BavatarHash%7D.$%7BavatarExt%7D?size=256`
     : `https://cdn.discordapp.com/embed/avatars/${(BigInt(u.id) >> 22n) % 6n}.png`;
+
   if (avatarEl && avatarEl.src !== avatarSrc) {
-  avatarEl.src = avatarSrc;
-  if ((localStorage.getItem("theme") || "pfp") === "pfp") {
-    applyDominantColorFromAvatar(avatarSrc);
+    avatarEl.src = avatarSrc;
+
+    if ((localStorage.getItem("theme") || "pfp") === "pfp") {
+      applyDominantColorFromAvatar(avatarSrc);
+    }
   }
-}
   if (mobileAvatarEl && mobileAvatarEl.src !== avatarSrc) mobileAvatarEl.src = avatarSrc;
   document.getElementById("username").textContent = u.global_name || u.username;
 
